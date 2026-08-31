@@ -39,7 +39,7 @@ app.listen(port, (error) => {
     process.exitCode = 1
     return
   }
-  console.log(`API JCPMS disponible sur le port ${port}`)
+  console.log(`API JCPMF disponible sur le port ${port}`)
 })
 
 module.exports = app

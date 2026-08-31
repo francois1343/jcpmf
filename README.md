@@ -1,4 +1,4 @@
-# JCPMS — MVP course à pied
+# JCPMF — MVP course à pied
 
 Application composée d’une API Express/MySQL et d’un client Nuxt 3 installable en PWA.
 
@@ -54,7 +54,7 @@ mysql -u root -p jcpms < backend/database/seed.sql
 cd backend
 cp .env.example .env
 npm install
-npm run create-admin -- --email=admin@example.com --username=admin --password=mot-de-passe-solide
+npm run create-admin -- --email=admin@jcpfm.local --username=admin --password=mot-de-passe-solide
 npm run dev
 ```
 

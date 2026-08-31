@@ -9,15 +9,15 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'JCPMS Running',
+      title: 'JCPMF Running',
       meta: [{ name: 'theme-color', content: '#2b8a57' }],
     },
   },
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'JCPMS Running',
-      short_name: 'JCPMS',
+      name: 'JCPMF Running',
+      short_name: 'JCPMF',
       description: 'Suivi de séances de course à pied',
       lang: 'fr',
       start_url: '/',

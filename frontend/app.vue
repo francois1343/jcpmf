@@ -7,7 +7,7 @@ const showNavigation = computed(() => !['/login', '/register'].includes(route.pa
 <template>
   <div>
     <nav v-if="showNavigation" class="app-nav">
-      <NuxtLink :to="user?.role === 'admin' ? '/admin' : '/'" class="brand">JCPMS</NuxtLink>
+      <NuxtLink :to="user?.role === 'admin' ? '/admin' : '/'" class="brand">JCPMF</NuxtLink>
       <div class="nav-actions">
         <span>{{ user?.username }}</span>
         <NuxtLink v-if="user?.role === 'admin'" to="/admin">Administration</NuxtLink>

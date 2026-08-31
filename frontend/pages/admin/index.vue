@@ -132,7 +132,7 @@ watch(selectedResource, resetForm, { immediate: true })
 <template>
   <main class="page-shell admin-page">
     <header class="page-heading">
-      <div><p class="eyebrow">Back-office</p><h1>Administration JCPMS</h1></div>
+      <div><p class="eyebrow">Back-office</p><h1>Administration JCPMF</h1></div>
       <button type="button" class="button button-secondary" @click="refresh">Actualiser</button>
     </header>
 
