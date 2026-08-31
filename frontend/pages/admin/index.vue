@@ -55,7 +55,7 @@ const definitions = {
 const exerciseTypes = [
   { value: 'warmup', label: 'Échauffement' }, { value: 'run', label: 'Course' },
   { value: 'walk', label: 'Marche' }, { value: 'sprint', label: 'Sprint' },
-  { value: 'cooldown', label: 'Retour au calme' }, { value: 'other', label: 'Autre' },
+  { value: 'stretching', label: 'Étirements' }, { value: 'other', label: 'Autre' },
 ]
 
 async function fetchAdminData() {

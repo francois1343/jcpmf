@@ -1,7 +1,7 @@
 const db = require('../config/db')
 const { cleanString, parseId, positiveInteger } = require('../utils/validation')
 
-const exerciseTypes = new Set(['warmup', 'run', 'walk', 'sprint', 'cooldown', 'other'])
+const exerciseTypes = new Set(['warmup', 'run', 'walk', 'sprint', 'stretching', 'cooldown', 'other'])
 
 const resources = {
   seasons: {

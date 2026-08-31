@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS exercises (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   training_session_id BIGINT UNSIGNED NOT NULL,
   title VARCHAR(120) NOT NULL,
-  type ENUM('warmup', 'run', 'walk', 'sprint', 'cooldown', 'other') NOT NULL DEFAULT 'other',
+  type ENUM('warmup', 'run', 'walk', 'sprint', 'stretching', 'cooldown', 'other') NOT NULL DEFAULT 'other',
   duration_seconds INT UNSIGNED NOT NULL,
   position INT UNSIGNED NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -29,5 +29,5 @@ SELECT @session_id, 'Marche active', 'walk', 90, 3
 WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE training_session_id = @session_id AND position = 3);
 
 INSERT INTO exercises (training_session_id, title, type, duration_seconds, position)
-SELECT @session_id, 'Retour au calme', 'cooldown', 300, 4
+SELECT @session_id, 'Étirements', 'stretching', 300, 4
 WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE training_session_id = @session_id AND position = 4);

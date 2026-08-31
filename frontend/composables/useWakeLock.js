@@ -1,9 +1,10 @@
 export function useWakeLock() {
   const wakeLock = shallowRef(null)
+  const isRequested = ref(false)
   const isSupported = computed(() => import.meta.client && 'wakeLock' in navigator)
 
-  async function requestWakeLock() {
-    if (!isSupported.value || document.visibilityState !== 'visible') return
+  async function acquire() {
+    if (!isRequested.value || !isSupported.value || document.visibilityState !== 'visible') return
     try {
       wakeLock.value = await navigator.wakeLock.request('screen')
       wakeLock.value.addEventListener('release', () => { wakeLock.value = null })
@@ -12,14 +13,24 @@ export function useWakeLock() {
     }
   }
 
+  async function requestWakeLock() {
+    isRequested.value = true
+    await acquire()
+  }
+
   async function releaseWakeLock() {
+    isRequested.value = false
     await wakeLock.value?.release()
     wakeLock.value = null
   }
 
-  onMounted(() => document.addEventListener('visibilitychange', requestWakeLock))
+  function restoreAfterVisibilityChange() {
+    if (document.visibilityState === 'visible') acquire()
+  }
+
+  onMounted(() => document.addEventListener('visibilitychange', restoreAfterVisibilityChange))
   onBeforeUnmount(() => {
-    document.removeEventListener('visibilitychange', requestWakeLock)
+    document.removeEventListener('visibilitychange', restoreAfterVisibilityChange)
     releaseWakeLock()
   })
 

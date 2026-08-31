@@ -2,6 +2,20 @@
 
 Application composée d’une API Express/MySQL et d’un client Nuxt 3 installable en PWA.
 
+## Fonctionnalités de la V1
+
+- Création de compte coureur, connexion JWT et déconnexion ; accès administrateur séparé.
+- Consultation du programme hiérarchique : saisons, semaines, sessions et exercices.
+- Indicateur de progression global et statut de chaque session.
+- Exécution d’une séance avec minuteur circulaire, état explicite « en cours » ou « en pause », passage manuel ou automatique à l’exercice suivant et Wake Lock.
+- Consignes audio pour l’échauffement, la course, la marche, le sprint et les étirements ; bouton pour répéter la consigne et synthèse vocale de secours.
+- Enregistrement du bilan d’une séance : distance et/ou nombre de pas.
+- Réinitialisation de la progression par session, semaine, saison ou programme complet.
+- CMS administrateur : CRUD des saisons, semaines, sessions et exercices ; suivi de l’avancement des coureurs.
+- Manifeste et Service Worker PWA pour une application installable, sans mode offline métier dans cette V1.
+
+Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
+
 ## Architecture
 
 ```text
