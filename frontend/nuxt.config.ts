@@ -30,8 +30,34 @@ export default defineNuxtConfig({
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
       ],
     },
-    // Service Worker présent pour l’installation, sans cache offline métier dans ce MVP.
-    workbox: { globPatterns: [], runtimeCaching: [], navigateFallback: null },
+    workbox: {
+      globPatterns: ['**/*.{js,css,png,svg,ico,woff2,mp3}'],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: true,
+      navigateFallback: null,
+      runtimeCaching: [
+        {
+          urlPattern: /^https?:\/\/[^/]+\/(?:$|login(?:\/|$)|register(?:\/|$)|profil(?:\/|$)|admin(?:\/|$)|session(?:\/|$))/,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'jcpmf-pages',
+            networkTimeoutSeconds: 3,
+            expiration: { maxEntries: 30, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+        {
+          urlPattern: /\.(?:js|css|woff2|png|svg|ico|mp3)(?:\?.*)?$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'jcpmf-assets',
+            expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+      ],
+    },
     devOptions: { enabled: false },
   },
   css: ['~/assets/main.css'],

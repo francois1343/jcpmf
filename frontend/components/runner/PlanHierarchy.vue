@@ -1,5 +1,8 @@
 <script setup>
-defineProps({ seasons: { type: Array, default: () => [] } })
+const props = defineProps({
+  seasons: { type: Array, default: () => [] },
+  statusFilter: { type: String, default: 'all' },
+})
 defineEmits(['reset'])
 
 function minutes(seconds) {
@@ -11,30 +14,48 @@ const statusLabels = {
   in_progress: 'En cours',
   completed: 'Terminée',
 }
+
+function visibleSessions(week) {
+  if (props.statusFilter === 'all') return week.sessions
+  return week.sessions.filter((session) => session.status === props.statusFilter)
+}
+
+function visibleWeeks(season) {
+  return season.weeks.filter((week) => visibleSessions(week).length)
+}
+
+function seasonPercent(season) {
+  return season.sessionCount ? Math.round(season.completedCount * 100 / season.sessionCount) : 0
+}
 </script>
 
 <template>
   <div class="plan">
     <details v-for="season in seasons" :key="season.id" class="season" open>
       <summary>
-        <span><strong>{{ season.title }}</strong><small>{{ season.completedCount }}/{{ season.sessionCount }} sessions</small></span>
+        <span class="season-summary-copy">
+          <span class="season-number">{{ String(season.position).padStart(2, '0') }}</span>
+          <span><strong>{{ season.title }}</strong><small>{{ season.completedCount }}/{{ season.sessionCount }} séances · {{ seasonPercent(season) }}%</small></span>
+        </span>
+        <span class="season-mini-progress" aria-hidden="true"><i :style="{ width: `${seasonPercent(season)}%` }" /></span>
       </summary>
       <div class="details-actions">
         <button type="button" class="text-button danger" @click="$emit('reset', 'season', season.id, season.title)">Réinitialiser la saison</button>
       </div>
       <p v-if="season.description" class="muted">{{ season.description }}</p>
 
-      <details v-for="week in season.weeks" :key="week.id" class="week">
+      <details v-for="week in visibleWeeks(season)" :key="week.id" class="week" :open="statusFilter !== 'all'">
         <summary>
-          <span><strong>{{ week.title }}</strong><small>{{ week.completedCount }}/{{ week.sessions.length }} sessions</small></span>
+          <span><strong>{{ week.title }}</strong><small>{{ week.completedCount }}/{{ week.sessions.length }} séances</small></span>
         </summary>
         <div class="details-actions">
           <button type="button" class="text-button danger" @click="$emit('reset', 'week', week.id, week.title)">Réinitialiser la semaine</button>
         </div>
 
         <div class="session-list">
-          <article v-for="session in week.sessions" :key="session.id" class="session-row">
-            <div>
+          <article v-for="session in visibleSessions(week)" :key="session.id" class="session-row" :class="`session-row-${session.status}`">
+            <span class="session-step" aria-hidden="true">{{ session.status === 'completed' ? '✓' : session.position }}</span>
+            <div class="session-copy">
               <span class="status" :class="`status-${session.status}`">{{ statusLabels[session.status] }}</span>
               <h3>{{ session.title }}</h3>
               <p>{{ session.exerciseCount }} exercices · {{ minutes(session.durationSeconds) }} min</p>
@@ -55,10 +76,10 @@ const statusLabels = {
               >Réinitialiser</button>
             </div>
           </article>
-          <p v-if="!week.sessions.length" class="empty">Aucune session dans cette semaine.</p>
+          <p v-if="!visibleSessions(week).length" class="empty">Aucune session ne correspond à ce filtre.</p>
         </div>
       </details>
-      <p v-if="!season.weeks.length" class="empty">Aucune semaine dans cette saison.</p>
+      <p v-if="!visibleWeeks(season).length" class="empty filtered-empty">Aucune session de cette saison ne correspond au filtre.</p>
     </details>
   </div>
 </template>

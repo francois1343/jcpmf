@@ -23,7 +23,10 @@ app.use(cors({
   },
 }))
 app.use(express.json({ limit: '100kb' }))
-app.get('/health', (_req, res) => res.json({ status: 'ok' }))
+app.get('/health', (_req, res) => res.json({
+  status: 'ok',
+  dataStore: (process.env.DATA_STORE || 'json').toLowerCase() === 'mysql' ? 'mysql' : 'json',
+}))
 app.use('/api', apiRoutes)
 
 app.use((_req, res) => res.status(404).json({ message: 'Route introuvable.' }))

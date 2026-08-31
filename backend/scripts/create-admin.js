@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 const bcrypt = require('bcryptjs')
-const db = require('../config/db')
+const useJsonStore = (process.env.DATA_STORE || 'json').toLowerCase() !== 'mysql'
 
 async function main() {
   const args = Object.fromEntries(
@@ -19,12 +19,29 @@ async function main() {
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
-  await db.execute(
-    `INSERT INTO users (username, email, password_hash, role)
-     VALUES (?, ?, ?, 'admin')
-     ON DUPLICATE KEY UPDATE username = VALUES(username), password_hash = VALUES(password_hash), role = 'admin'`,
-    [username, email, passwordHash],
-  )
+  if (useJsonStore) {
+    const store = require('../storage/json-store')
+    await store.update((data) => {
+      const now = new Date().toISOString()
+      let user = data.users.find((item) => (
+        item.email.toLowerCase() === email || item.username.toLowerCase() === username.toLowerCase()
+      ))
+      if (!user) {
+        user = { id: store.nextId(data.users), createdAt: now }
+        data.users.push(user)
+      }
+      Object.assign(user, { username, email, passwordHash, role: 'admin', updatedAt: now })
+    })
+  } else {
+    const db = require('../config/db')
+    await db.execute(
+      `INSERT INTO users (username, email, password_hash, role)
+       VALUES (?, ?, ?, 'admin')
+       ON DUPLICATE KEY UPDATE username = VALUES(username), password_hash = VALUES(password_hash), role = 'admin'`,
+      [username, email, passwordHash],
+    )
+    await db.end()
+  }
   console.log(`Compte administrateur prêt : ${email}`)
 }
 
@@ -33,4 +50,3 @@ main()
     console.error(error.message)
     process.exitCode = 1
   })
-  .finally(() => db.end())

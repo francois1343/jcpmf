@@ -1,8 +1,9 @@
 const express = require('express')
 const rateLimit = require('express-rate-limit')
-const auth = require('../controllers/auth.controller')
-const admin = require('../controllers/admin.controller')
-const runner = require('../controllers/runner.controller')
+const useJsonStore = (process.env.DATA_STORE || 'json').toLowerCase() !== 'mysql'
+const auth = require(useJsonStore ? '../controllers/json/auth.controller' : '../controllers/auth.controller')
+const admin = require(useJsonStore ? '../controllers/json/admin.controller' : '../controllers/admin.controller')
+const runner = require(useJsonStore ? '../controllers/json/runner.controller' : '../controllers/runner.controller')
 const { authenticate, requireAdmin } = require('../middlewares/auth.middleware')
 
 const router = express.Router()

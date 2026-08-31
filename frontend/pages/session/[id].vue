@@ -13,6 +13,8 @@ const phase = ref(
 )
 const result = reactive({ distanceKm: session.value?.distanceKm ?? '', stepsCount: session.value?.stepsCount ?? '' })
 const errorMessage = ref('')
+const resumeStored = ref(session.value?.status === 'in_progress')
+const tracking = useSessionTracking(route.params.id)
 
 function durationOf(exercise) {
   return Number(exercise.duration_seconds ?? exercise.durationSeconds ?? 0)
@@ -24,8 +26,15 @@ async function start() {
     return
   }
   errorMessage.value = ''
-  await api(`/runner/sessions/${session.value.id}/start`, { method: 'PUT' })
-  phase.value = 'active'
+  try {
+    await tracking.startTracking({ reset: true })
+    await api(`/runner/sessions/${session.value.id}/start`, { method: 'PUT' })
+    resumeStored.value = false
+    phase.value = 'active'
+  } catch (requestError) {
+    tracking.stopTracking()
+    errorMessage.value = requestError?.data?.message || 'Impossible de démarrer la séance.'
+  }
 }
 
 async function saveExerciseProgress(currentExerciseIndex) {
@@ -39,6 +48,9 @@ async function saveExerciseProgress(currentExerciseIndex) {
 }
 
 function showResult() {
+  tracking.stopTracking()
+  result.distanceKm = tracking.distanceKm.value
+  result.stepsCount = tracking.stepsCount.value
   phase.value = 'result'
 }
 
@@ -48,8 +60,8 @@ async function complete() {
     await api(`/runner/sessions/${session.value.id}/complete`, {
       method: 'PUT',
       body: {
-        distanceKm: result.distanceKm === '' ? null : Number(result.distanceKm),
-        stepsCount: result.stepsCount === '' ? null : Number(result.stepsCount),
+        distanceKm: Number(tracking.distanceKm.value),
+        stepsCount: Number(tracking.stepsCount.value),
       },
     })
     phase.value = 'completed'
@@ -57,6 +69,10 @@ async function complete() {
     errorMessage.value = requestError?.data?.message || 'Bilan non enregistré.'
   }
 }
+
+onMounted(() => {
+  if (phase.value === 'active') tracking.startTracking({ reset: false })
+})
 </script>
 
 <template>
@@ -73,6 +89,7 @@ async function complete() {
           <span>{{ exercise.title }}</span><strong>{{ Math.ceil(durationOf(exercise) / 60) }} min</strong>
         </li>
       </ol>
+      <p class="measurement-consent">Au lancement, autorisez la localisation et les mouvements pour calculer automatiquement votre distance et estimer vos pas.</p>
       <button type="button" class="button button-large" @click="start">Lancer la session</button>
     </section>
 
@@ -83,7 +100,17 @@ async function complete() {
       :week-title="session.weekTitle"
       :exercises="session.exercises"
       :initial-exercise-index="session.currentExerciseIndex"
+      :session-id="session.id"
+      :resume-stored="resumeStored"
+      :distance-km="tracking.distanceKm.value"
+      :steps-count="tracking.stepsCount.value"
+      :tracking-active="tracking.isTracking.value"
+      :gps-status="tracking.gpsStatus.value"
+      :motion-status="tracking.motionStatus.value"
+      :measurement-message="tracking.measurementMessage.value"
       @exercise-change="saveExerciseProgress"
+      @running-change="tracking.setTrackingActive"
+      @request-tracking="tracking.startTracking({ reset: false })"
       @complete="showResult"
       @finish="showResult"
     />
@@ -91,12 +118,13 @@ async function complete() {
     <section v-else-if="session && phase === 'result'" class="card result-form">
       <p class="eyebrow">Bilan de session</p>
       <h1>Bravo, entraînement terminé !</h1>
-      <p>Renseignez au moins une des deux valeurs.</p>
-      <form @submit.prevent="complete">
-        <label>Distance parcourue (km)<input v-model="result.distanceKm" type="number" min="0" max="1000" step="0.01" inputmode="decimal"></label>
-        <label>Nombre de pas<input v-model="result.stepsCount" type="number" min="0" max="1000000" step="1" inputmode="numeric"></label>
-        <button class="button button-large">Enregistrer le bilan</button>
-      </form>
+      <p>Les valeurs ont été calculées automatiquement pendant votre séance.</p>
+      <div class="automatic-result-grid">
+        <article><span aria-hidden="true">⌖</span><small>Distance parcourue</small><strong>{{ Number(result.distanceKm || 0).toFixed(2) }} km</strong></article>
+        <article><span aria-hidden="true">↟</span><small>Pas estimés</small><strong>{{ Number(result.stepsCount || 0) }} pas</strong></article>
+      </div>
+      <p class="measurement-disclaimer">La distance dépend de la précision GPS. Le nombre de pas est une estimation issue du capteur de mouvement du téléphone.</p>
+      <button type="button" class="button button-large" @click="complete">Enregistrer automatiquement le bilan</button>
     </section>
 
     <section v-else-if="session && phase === 'completed'" class="card result-form">

@@ -6,6 +6,11 @@ export function useAuth() {
   })
   const user = useState('auth-user', () => null)
   const config = useRuntimeConfig()
+  const offline = useOfflineStore()
+
+  function offlineScope() {
+    return user.value?.id ? `user-${user.value.id}` : offlineScopeFromToken(token.value)
+  }
 
   async function login(identifier, password) {
     const data = await $fetch('/auth/login', {
@@ -15,6 +20,7 @@ export function useAuth() {
     })
     token.value = data.token
     user.value = data.user
+    await offline.setCached(`user-${data.user.id}`, '/auth/me', data.user)
     return data.user
   }
 
@@ -26,6 +32,7 @@ export function useAuth() {
     })
     token.value = data.token
     user.value = data.user
+    await offline.setCached(`user-${data.user.id}`, '/auth/me', data.user)
     return data.user
   }
 
@@ -41,14 +48,7 @@ export function useAuth() {
 
   async function api(path, options = {}) {
     try {
-      return await $fetch(path, {
-        baseURL: config.public.apiBase,
-        ...options,
-        headers: {
-          ...options.headers,
-          ...(token.value ? { Authorization: `Bearer ${token.value}` } : {}),
-        },
-      })
+      return await offline.request(offlineScope(), path, options, token.value, config.public.apiBase)
     } catch (error) {
       if (error?.status === 401 || error?.statusCode === 401) clearSession()
       throw error
