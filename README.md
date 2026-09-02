@@ -1,6 +1,6 @@
 # JCPMF — MVP course à pied
 
-Application composée d’une API Express, d’un stockage JSON temporaire ou MySQL, et d’un client Nuxt 3 installable en PWA.
+Application composée d’une API Express, d’un stockage JSON temporaire ou MySQL, et d’un frontend classique en HTML, CSS et JavaScript natifs.
 
 ## Fonctionnalités de la V1
 
@@ -8,14 +8,13 @@ Application composée d’une API Express, d’un stockage JSON temporaire ou My
 - Consultation du programme hiérarchique : saisons, semaines, sessions et exercices.
 - Saison 1 « De 0 à 5 km » transcrite depuis les 36 cartes JCPMF : 12 semaines, 3 jours par semaine et durées exactes en course, marche ou marche/trot.
 - Indicateur de progression global et statut de chaque session.
-- Exécution d’une séance avec minuteur circulaire, état explicite « en cours » ou « en pause », passage manuel ou automatique à l’exercice suivant et Wake Lock.
+- Exécution d’une séance avec minuteur circulaire, état explicite « en cours » ou « en pause » et passage manuel ou automatique à l’exercice suivant.
 - Consignes audio pour l’échauffement, la course, la marche, le sprint et les étirements ; bouton pour répéter la consigne et synthèse vocale de secours.
 - Mesure automatique pendant la séance : distance GPS et estimation des pas par capteur de mouvement, avec bilan prérempli sans saisie.
-- Mode hors-ligne : programme et séances conservés dans IndexedDB, actions mises en attente puis synchronisées au retour du réseau.
-- Reprise locale du chrono et de l’exercice courant après une fermeture ou une coupure ; retour à l’échauffement disponible pendant la pause.
+- Reprise locale du chrono et de l’exercice courant après un rechargement de la page.
 - Réinitialisation de la progression par session, semaine, saison ou programme complet.
 - CMS administrateur : CRUD des saisons, semaines, sessions et exercices ; suivi de l’avancement des coureurs.
-- Manifeste et Service Worker PWA pour une application installable, avec cache des écrans visités et des ressources statiques.
+- Installation sur l’écran d’accueil grâce au manifeste et au Service Worker écrits en JavaScript natif.
 - Mode JSON de développement couvrant les mêmes endpoints que MySQL, afin de tester l’application sans base distante.
 
 Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
@@ -36,21 +35,17 @@ Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretchi
 │   ├── storage/json-store.js
 │   ├── utils/validation.js
 │   └── server.js
-└── frontend
-    ├── components
-    │   ├── admin/CrudTable.vue
-    │   └── runner/{ActiveSession,PlanHierarchy,ProgressTracker}.vue
-    ├── composables/{useAuth,useWakeLock}.js
-    ├── middleware/auth.global.js
-    ├── pages
-    │   ├── admin/index.vue
-    │   ├── session/[id].vue
-    │   ├── index.vue
-    │   ├── profil.vue
-    │   ├── login.vue
-    │   └── register.vue
-    ├── public/icons
-    └── nuxt.config.ts
+├── frontend
+│   ├── css/styles.css
+│   ├── js/{api,common,config}.js
+│   ├── js/{login,register,dashboard,session,profile,admin}.js
+│   ├── {index,login,register,session,profile,admin}.html
+│   ├── manifest.webmanifest
+│   ├── sw.js
+│   ├── dev-server.js
+│   └── package.json
+└── frontend-nuxt-backup
+    └── ancienne version Nuxt conservée temporairement
 ```
 
 ## Schéma MySQL
@@ -79,8 +74,6 @@ Dans un second terminal :
 
 ```bash
 cd frontend
-cp .env.example .env
-npm install
 npm run dev
 ```
 
@@ -100,19 +93,11 @@ cd backend
 npm run rebuild-season-one
 ```
 
-## Tester le mode hors-ligne et les capteurs
-
-Le Service Worker est désactivé avec `npm run dev`. Pour tester le cache PWA localement :
-
-```bash
-cd frontend
-npm run build
-npm run preview
-```
-
-Connectez-vous une première fois avec du réseau et ouvrez le tableau de bord. Le programme, le profil, les fichiers audio et les séances consultées deviennent alors disponibles hors ligne. Les actions hors ligne sont conservées dans IndexedDB et une bannière indique leur état de synchronisation.
+## Tester les capteurs
 
 La localisation et les capteurs de mouvement nécessitent l’autorisation de l’utilisateur. En dehors de `localhost`, la page doit être servie en HTTPS. La distance est calculée à partir des positions GPS filtrées ; les pas restent une estimation dépendant du téléphone et de la manière dont il est porté.
+
+L’application est installable après son déploiement en HTTPS. Sur Android, le bouton `Installer` ouvre la demande du navigateur. Sur iPhone, utiliser Safari puis `Partager` → `Sur l’écran d’accueil`. Le Service Worker conserve les fichiers de l’interface, mais les données personnalisées et leur synchronisation nécessitent toujours l’accès au backend.
 
 ## Installation locale avec MySQL
 
@@ -135,12 +120,10 @@ Dans un second terminal :
 
 ```bash
 cd frontend
-cp .env.example .env
-npm install
 npm run dev
 ```
 
-Frontend : `http://localhost:3000` — API : `http://localhost:4000` — santé API : `GET /health`.
+Frontend : `http://127.0.0.1:3000` — API : `http://127.0.0.1:4000` — santé API : `GET /health`.
 
 ## Variables d’environnement
 
@@ -153,9 +136,7 @@ Backend :
 - `JWT_EXPIRES_IN` : durée du token, `8h` par défaut
 - `FRONTEND_URL` : une ou plusieurs origines séparées par des virgules
 
-Frontend :
-
-- `NUXT_PUBLIC_API_BASE` : URL publique complète de l’API, terminée par `/api`
+Frontend : l’adresse de l’API est définie de façon explicite dans `frontend/js/config.js`.
 
 ## Endpoints REST du MVP
 
@@ -198,9 +179,7 @@ Les valeurs de `:resource` autorisées sont `seasons`, `weeks`, `sessions` et `e
 
 ## Déploiement
 
-- Frontend Vercel/Netlify : déployer le dossier `frontend`, définir `NUXT_PUBLIC_API_BASE`, commande de build `npm run build`.
+- Frontend Vercel/Netlify : déployer le dossier statique `frontend`, sans commande de build. Pour la production, définir l’adresse publique du backend dans `frontend/js/config.js`. Le site doit être servi en HTTPS pour l’installation mobile.
 - Backend Vercel de test : déployer `backend` avec `DATA_STORE=json`, `JWT_SECRET` et `FRONTEND_URL`. Le fichier est copié dans l’espace temporaire de la fonction ; inscriptions, CRUD et progressions peuvent être perdus lors d’un redémarrage à froid ou d’un redéploiement.
 - Backend Hostinger final : déployer `backend`, définir `DATA_STORE=mysql`, importer les deux fichiers SQL dans la base fournie, définir les variables d’environnement, puis exécuter `npm start`.
-- Les URLs de production doivent être en HTTPS pour que Wake Lock et l’installation PWA fonctionnent correctement.
-
-Le Service Worker utilise une stratégie Network First pour les écrans et Cache First pour les ressources statiques. IndexedDB conserve séparément les données personnalisées et la file des actions à synchroniser.
+- Les URLs de production doivent être en HTTPS pour la localisation et les capteurs du téléphone.
