@@ -3,6 +3,7 @@ import { escapeHtml, formatMinutes, mountNavigation, requireUser, showMessage } 
 import { mountEngagementDashboard } from './engagement.js'
 import { syncCompletedSessions } from './gamification.js'
 import { showReminderOnboardingOnce } from './reminder-ui.js'
+import { mountWeatherWidget } from './weather.js'
 
 const dashboard = document.querySelector('#dashboard')
 const message = document.querySelector('#message')
@@ -75,6 +76,7 @@ function render(user) {
 
   dashboard.className = ''
   dashboard.innerHTML = `
+    <section id="weather-widget" class="weather-card card" aria-live="polite"></section>
     <section class="hero">
       <div class="hero-content">
         <p class="eyebrow">Votre terrain d’entraînement</p>
@@ -103,6 +105,7 @@ function render(user) {
       <div class="plan">${renderPlan()}</div>
     </section>
     <section id="engagement-dashboard" class="engagement-section" aria-label="Statistiques et gamification"></section>`
+  mountWeatherWidget(document.querySelector('#weather-widget'))
   mountEngagementDashboard(document.querySelector('#engagement-dashboard'))
   showReminderOnboardingOnce()
 }

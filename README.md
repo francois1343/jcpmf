@@ -20,6 +20,7 @@ Application composée d’une API Express, d’un stockage JSON temporaire ou My
 - Photo de profil locale avec prévisualisation, compression Canvas, galerie d’avatars SVG et affichage dans la navigation.
 - Export local de l’historique des séances en CSV compatible Excel et sauvegarde complète du `localStorage` en JSON.
 - Apparence locale claire, sombre ou automatique, avec couleurs d’effort facultatives pendant les séances.
+- Widget météo géolocalisé avec repli sur Bruxelles et conseil de course adapté aux conditions actuelles.
 - Mode JSON de développement couvrant les mêmes endpoints que MySQL, afin de tester l’application sans base distante.
 
 Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
@@ -46,7 +47,7 @@ Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretchi
 │   ├── api/config.js
 │   ├── js/{api,appearance,appearance-init,avatar,common,config,data-export}.js
 │   ├── js/{login,register,dashboard,session,profile,admin}.js
-│   ├── js/{gamification,engagement,reminders,reminder-ui}.js
+│   ├── js/{gamification,engagement,reminders,reminder-ui,weather}.js
 │   ├── {index,login,register,session,profile,admin}.html
 │   ├── manifest.webmanifest
 │   ├── sw.js

@@ -150,6 +150,27 @@ input, select, textarea { width: 100%; padding: .75rem; border: 1px solid var(--
 .progress-ring strong { color: white; font-size: 2.8rem; letter-spacing: -.06em; }
 .progress-ring small { color: rgb(255 255 255 / 68%); }
 
+.weather-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .75rem 1.1rem; margin: 0 0 1.2rem; background: linear-gradient(135deg, var(--surface), var(--accent-soft)); box-shadow: none; }
+.weather-icon { width: 3.8rem; aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 1.1rem; background: var(--surface); font-size: 1.9rem; }
+.weather-loading { color: var(--green-700); font-size: 1rem; font-weight: 950; letter-spacing: .15em; animation: weather-pulse 1.1s ease-in-out infinite alternate; }
+.weather-copy { min-width: 0; }
+.weather-copy .eyebrow { margin-bottom: .25rem; }
+.weather-copy h2 { margin-bottom: .3rem; font-size: 1.05rem; }
+.weather-copy > .muted { margin-bottom: 0; font-size: .84rem; }
+.weather-current { display: flex; align-items: baseline; flex-wrap: wrap; gap: .35rem .7rem; }
+.weather-current strong { color: var(--green-800); font-size: clamp(1.8rem, 5vw, 2.65rem); letter-spacing: -.06em; }
+.weather-current h2 { margin: 0; color: var(--heading); font-size: 1rem; font-weight: 800; }
+.weather-details { display: flex; flex-wrap: wrap; gap: .35rem .9rem; margin-top: .15rem; color: var(--muted); font-size: .76rem; }
+.weather-refresh { min-height: 2.45rem; padding: .5rem .7rem; border: 1px solid var(--control-border); border-radius: .65rem; color: var(--green-700); background: var(--surface); font-weight: 800; cursor: pointer; }
+.weather-refresh:hover { background: var(--soft-hover); }
+.weather-advice { grid-column: 2 / -1; margin: .2rem 0 0; padding-top: .7rem; border-top: 1px solid var(--border); color: var(--text); font-size: .88rem; font-weight: 750; }
+.weather-source { grid-column: 2 / -1; width: fit-content; color: var(--muted); font-size: .68rem; }
+
+@keyframes weather-pulse {
+  from { opacity: .35; }
+  to { opacity: 1; }
+}
+
 .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0 2rem; }
 .metric { display: grid; gap: .2rem; }
 .metric strong { color: var(--green-800); font-size: 1.6rem; }
@@ -323,6 +344,9 @@ th { color: var(--muted); font-size: .75rem; text-transform: uppercase; }
   .app-nav { position: static; }
   .hero { grid-template-columns: 1fr; padding: 1.5rem; }
   .progress-ring { width: 10rem; margin: auto; }
+  .weather-card { grid-template-columns: auto minmax(0, 1fr); padding: 1.1rem; }
+  .weather-refresh, .weather-advice, .weather-source { grid-column: 1 / -1; }
+  .weather-refresh { width: 100%; }
   .metrics { grid-template-columns: 1fr; }
   .engagement-heading { align-items: flex-start; flex-direction: column; }
   .engagement-heading > p { text-align: left; }
@@ -362,4 +386,5 @@ th { color: var(--muted); font-size: .75rem; text-transform: uppercase; }
 
 @media (max-width: 390px) {
   .avatar-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .weather-details { align-items: flex-start; flex-direction: column; gap: .2rem; }
 }
