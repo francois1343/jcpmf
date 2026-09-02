@@ -72,7 +72,7 @@ export function mountNavigation(user) {
         <span class="nav-identity"><span class="nav-avatar" data-user-avatar aria-hidden="true"></span><span class="nav-user">${escapeHtml(user.username)}</span></span>
         ${user.role === 'admin'
           ? '<a href="/admin.html">Administration</a>'
-          : '<a href="/profile.html">Mon profil</a>'}
+          : '<a href="/routes.html">Parcours</a><a href="/profile.html">Mon profil</a>'}
         <button class="button button-ghost" type="button" data-install-app hidden>Installer</button>
         <button class="button button-ghost" type="button" data-logout>Déconnexion</button>
       </div>

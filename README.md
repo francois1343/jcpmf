@@ -21,6 +21,7 @@ Application composée d’une API Express, d’un stockage JSON temporaire ou My
 - Export local de l’historique des séances en CSV compatible Excel et sauvegarde complète du `localStorage` en JSON.
 - Apparence locale claire, sombre ou automatique, avec couleurs d’effort facultatives pendant les séances.
 - Widget météo géolocalisé avec repli sur Bruxelles et conseil de course adapté aux conditions actuelles.
+- Parcours running sur carte Leaflet/OpenStreetMap avec position directe, trace locale, pause, allure et progression.
 - Mode JSON de développement couvrant les mêmes endpoints que MySQL, afin de tester l’application sans base distante.
 
 Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
@@ -48,7 +49,9 @@ Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretchi
 │   ├── js/{api,appearance,appearance-init,avatar,common,config,data-export}.js
 │   ├── js/{login,register,dashboard,session,profile,admin}.js
 │   ├── js/{gamification,engagement,reminders,reminder-ui,weather}.js
-│   ├── {index,login,register,session,profile,admin}.html
+│   ├── js/{routes-core,route-planner,routes}.js
+│   ├── parcours.json
+│   ├── {index,login,register,session,profile,routes,admin}.html
 │   ├── manifest.webmanifest
 │   ├── sw.js
 │   ├── dev-server.js
@@ -130,6 +133,14 @@ Depuis l’administration, « Sauvegarder la base JSON » génère `jcpmf_backup
 ## Apparence
 
 La section « Apparence » du profil applique immédiatement le thème clair, sombre ou automatique. Le choix est conservé dans `localStorage` sous la clé `app_theme`. L’option facultative de couleurs d’effort est enregistrée sous `dynamic_colors_enabled` : lorsqu’elle est active, l’écran de séance adapte son fond à la course, la marche, l’échauffement, le sprint ou les étirements. Désactivée, la séance conserve le fond vert par défaut.
+
+## Parcours et suivi GPS
+
+La page `routes.html` charge trois modèles de distance depuis `parcours.json`. Après une localisation GPS ou la saisie volontaire d’une adresse, elle calcule trois boucles pédestres autour de ce départ avec le serveur public OSRM « foot » d’OpenStreetMap, avec Valhalla comme repli, puis estime leur dénivelé avec Open-Meteo. La saisie d’adresse utilise Nominatim uniquement lors de l’envoi du formulaire, sans auto-complétion ; les résultats récents sont mis en cache localement pour éviter les requêtes répétées.
+
+Le GPS est suivi avec `watchPosition()` seulement après l’action « Démarrer ». La trace réelle, le chronomètre, la distance, l’allure et la progression restent en mémoire dans le navigateur et sont supprimés au rechargement ; aucune coordonnée n’est envoyée au backend JCPMF. La position ou l’adresse de départ est toutefois transmise directement aux services cartographiques nécessaires au calcul, comme indiqué dans l’interface.
+
+Les tuiles cartographiques, le calcul des parcours, l’altitude et la recherche d’adresse nécessitent une connexion réseau. Les services publics utilisés conviennent au MVP et au test ; une application à fort trafic doit employer des instances dédiées ou un fournisseur avec contrat. Aucun téléchargement massif ou mode hors ligne des tuiles OpenStreetMap n’est effectué.
 
 ## Installation locale avec MySQL
 
