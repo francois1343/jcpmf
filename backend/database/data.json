@@ -3226,13 +3226,26 @@
       "id": 1,
       "userId": 2,
       "trainingSessionId": 1,
-      "createdAt": "2026-08-31T14:02:11.353Z",
-      "updatedAt": "2026-08-31T14:02:11.353Z",
+      "createdAt": "2026-09-02T06:42:47.957Z",
+      "updatedAt": "2026-09-02T06:42:53.240Z",
+      "status": "completed",
+      "currentExerciseIndex": 12,
+      "distanceKm": 0,
+      "stepsCount": 0,
+      "startedAt": "2026-09-02T06:42:47.957Z",
+      "completedAt": "2026-09-02T06:42:53.240Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "trainingSessionId": 2,
+      "createdAt": "2026-09-02T06:53:19.789Z",
+      "updatedAt": "2026-09-02T06:53:19.789Z",
       "status": "in_progress",
       "currentExerciseIndex": 0,
       "distanceKm": null,
       "stepsCount": null,
-      "startedAt": "2026-08-31T14:02:11.353Z",
+      "startedAt": "2026-09-02T06:53:19.789Z",
       "completedAt": null
     }
   ]
