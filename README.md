@@ -19,6 +19,7 @@ Application composée d’une API Express, d’un stockage JSON temporaire ou My
 - Rappels d’inactivité facultatifs via l’API Notification et le Service Worker.
 - Photo de profil locale avec prévisualisation, compression Canvas, galerie d’avatars SVG et affichage dans la navigation.
 - Export local de l’historique des séances en CSV compatible Excel et sauvegarde complète du `localStorage` en JSON.
+- Apparence locale claire, sombre ou automatique, avec couleurs d’effort facultatives pendant les séances.
 - Mode JSON de développement couvrant les mêmes endpoints que MySQL, afin de tester l’application sans base distante.
 
 Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
@@ -43,7 +44,7 @@ Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretchi
 │   ├── assets/avatars/*.svg
 │   ├── css/styles.css
 │   ├── api/config.js
-│   ├── js/{api,avatar,common,config,data-export}.js
+│   ├── js/{api,appearance,appearance-init,avatar,common,config,data-export}.js
 │   ├── js/{login,register,dashboard,session,profile,admin}.js
 │   ├── js/{gamification,engagement,reminders,reminder-ui}.js
 │   ├── {index,login,register,session,profile,admin}.html
@@ -124,6 +125,10 @@ Les statistiques sont liées au navigateur et à l’appareil : supprimer les do
 Depuis « Mon profil », le coureur peut télécharger ses séances terminées dans `mes_courses_YYYY-MM-DD.csv`. Le fichier utilise le séparateur point-virgule et un BOM UTF-8 pour conserver correctement les accents dans Excel.
 
 Depuis l’administration, « Sauvegarder la base JSON » génère `jcpmf_backup_YYYY-MM-DD.json` avec une copie fidèle de toutes les clés et valeurs du `localStorage` du navigateur courant. Ce fichier peut contenir le jeton de connexion et la photo de profil : il doit rester privé. Cette sauvegarde locale ne remplace pas une sauvegarde du fichier `backend/database/data.json` ou d’une base MySQL distante.
+
+## Apparence
+
+La section « Apparence » du profil applique immédiatement le thème clair, sombre ou automatique. Le choix est conservé dans `localStorage` sous la clé `app_theme`. L’option facultative de couleurs d’effort est enregistrée sous `dynamic_colors_enabled` : lorsqu’elle est active, l’écran de séance adapte son fond à la course, la marche, l’échauffement, le sprint ou les étirements. Désactivée, la séance conserve le fond vert par défaut.
 
 ## Installation locale avec MySQL
 

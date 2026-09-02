@@ -1,4 +1,5 @@
 import { api } from './api.js'
+import { APPEARANCE_EVENT, isDynamicColorsEnabled } from './appearance.js'
 import { escapeHtml, formatMinutes, formatTime, mountNavigation, requireUser, showMessage } from './common.js'
 import { effortDurationOf, recordSessionCompletion } from './gamification.js'
 
@@ -142,6 +143,8 @@ function renderActive() {
   const exercise = session.exercises[state.currentIndex]
   const type = exerciseType(exercise)
   container.className = 'active-session'
+  container.classList.toggle('dynamic-effort-colors', isDynamicColorsEnabled())
+  container.dataset.effort = type
   container.innerHTML = `
     <div class="session-top"><a href="/index.html">← Programme</a><span>${escapeHtml(session.weekTitle)} · ${escapeHtml(session.title)}</span></div>
     <div class="active-heading">
@@ -312,6 +315,12 @@ async function load() {
 window.addEventListener('beforeunload', () => {
   if (state) saveState()
   stopTracking()
+})
+
+window.addEventListener(APPEARANCE_EVENT, () => {
+  if (container.classList.contains('active-session')) {
+    container.classList.toggle('dynamic-effort-colors', isDynamicColorsEnabled())
+  }
 })
 
 load()

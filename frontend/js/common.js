@@ -1,3 +1,4 @@
+import './appearance.js'
 import { clearSession, currentUser, getStoredUser, getToken } from './api.js'
 import { renderProfileAvatar } from './avatar.js'
 import { setupInstallButtons } from './pwa.js'

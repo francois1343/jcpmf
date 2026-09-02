@@ -8,6 +8,7 @@ import {
   saveProfileAvatar,
   selectPresetAvatar,
 } from './avatar.js'
+import { getAppearancePreferences, setDynamicColorsEnabled, setTheme } from './appearance.js'
 import { escapeHtml, mountNavigation, requireUser, showMessage } from './common.js'
 import { exportCompletedSessionsCsv } from './data-export.js'
 import { mountReminderSettings } from './reminder-ui.js'
@@ -68,6 +69,31 @@ async function load() {
       </div>
       <button id="export-csv" class="button button-ghost" type="button">Exporter mes données CSV</button>
       <p id="export-csv-status" class="export-status" role="status"></p>
+    </section>
+    <section class="card appearance-card" aria-labelledby="appearance-title">
+      <div class="appearance-heading">
+        <span class="settings-icon" aria-hidden="true">◐</span>
+        <div class="settings-copy">
+          <p class="eyebrow">Préférences</p>
+          <h2 id="appearance-title">Apparence</h2>
+          <p class="muted">Personnalisez discrètement l’affichage sur cet appareil.</p>
+        </div>
+      </div>
+      <div class="appearance-controls">
+        <label for="theme-select">Thème
+          <select id="theme-select" name="theme">
+            <option value="light">Clair</option>
+            <option value="dark">Sombre</option>
+            <option value="auto">Automatique selon le système</option>
+          </select>
+        </label>
+        <label class="toggle-setting" for="dynamic-colors">
+          <span><strong>Couleurs d’effort</strong><small>Adapter le fond à l’exercice en cours.</small></span>
+          <input id="dynamic-colors" type="checkbox" role="switch">
+          <span class="toggle-switch" aria-hidden="true"></span>
+        </label>
+      </div>
+      <p id="appearance-status" class="appearance-status" role="status"></p>
     </section>
     <section id="reminder-settings" class="card settings-card" aria-label="Réglages des rappels"></section>
     <section class="card danger-zone">
@@ -139,6 +165,27 @@ async function load() {
   })
 
   mountReminderSettings(document.querySelector('#reminder-settings'))
+
+  const appearance = getAppearancePreferences()
+  const themeSelect = document.querySelector('#theme-select')
+  const dynamicColors = document.querySelector('#dynamic-colors')
+  const appearanceStatus = document.querySelector('#appearance-status')
+  themeSelect.value = appearance.theme
+  dynamicColors.checked = appearance.dynamicColorsEnabled
+
+  function saveAppearance(changePreference) {
+    try {
+      changePreference()
+      appearanceStatus.textContent = 'Préférence enregistrée sur cet appareil.'
+      appearanceStatus.className = 'appearance-status success'
+    } catch (error) {
+      appearanceStatus.textContent = error.message
+      appearanceStatus.className = 'appearance-status error'
+    }
+  }
+
+  themeSelect.addEventListener('change', () => saveAppearance(() => setTheme(themeSelect.value)))
+  dynamicColors.addEventListener('change', () => saveAppearance(() => setDynamicColorsEnabled(dynamicColors.checked)))
 
   document.querySelector('#export-csv').addEventListener('click', (event) => {
     const status = document.querySelector('#export-csv-status')

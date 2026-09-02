@@ -1,5 +1,5 @@
 // Changez ce nom lors d’une mise en production importante pour renouveler le cache installé.
-const CACHE_NAME = 'jcpmf-static-2026-09-02-12'
+const CACHE_NAME = 'jcpmf-static-2026-09-02-14'
 const APP_FILES = [
   '/',
   '/index.html',
@@ -12,6 +12,8 @@ const APP_FILES = [
   '/js/config.js',
   '/js/api.js',
   '/js/avatar.js',
+  '/js/appearance-init.js',
+  '/js/appearance.js',
   '/js/common.js',
   '/js/pwa.js',
   '/js/gamification.js',
