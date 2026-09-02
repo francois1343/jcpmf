@@ -1,5 +1,5 @@
 // Changez ce nom lors d’une mise en production importante pour renouveler le cache installé.
-const CACHE_NAME = 'jcpmf-static-2026-09-02-4'
+const CACHE_NAME = 'jcpmf-static-2026-09-02-9'
 const APP_FILES = [
   '/',
   '/index.html',
@@ -13,6 +13,10 @@ const APP_FILES = [
   '/js/api.js',
   '/js/common.js',
   '/js/pwa.js',
+  '/js/gamification.js',
+  '/js/engagement.js',
+  '/js/reminders.js',
+  '/js/reminder-ui.js',
   '/js/login.js',
   '/js/register.js',
   '/js/dashboard.js',
@@ -47,6 +51,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
   const url = new URL(event.request.url)
   if (url.origin !== self.location.origin) return
+  if (url.pathname.startsWith('/api/')) return
 
   event.respondWith(
     fetch(event.request)
@@ -62,4 +67,28 @@ self.addEventListener('fetch', (event) => {
         return cached || (event.request.mode === 'navigate' ? caches.match('/login.html') : Response.error())
       }),
   )
+})
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type !== 'SHOW_INACTIVITY_REMINDER') return
+  event.waitUntil(self.registration.showNotification(event.data.title || 'JCPMF', {
+    body: event.data.body,
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    tag: 'jcpmf-inactivity-reminder',
+    renotify: true,
+    data: { url: '/index.html' },
+  }))
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const targetUrl = new URL(event.notification.data?.url || '/index.html', self.location.origin).href
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+    const currentWindow = windows.find((client) => client.url.startsWith(self.location.origin))
+    if (currentWindow) {
+      return currentWindow.navigate(targetUrl).then((client) => client?.focus())
+    }
+    return self.clients.openWindow(targetUrl)
+  }))
 })

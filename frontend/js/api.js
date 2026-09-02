@@ -1,4 +1,4 @@
-import { API_BASE } from './config.js'
+import { getApiBase } from './config.js'
 
 const TOKEN_KEY = 'jcpmf_token'
 const USER_KEY = 'jcpmf_user'
@@ -33,15 +33,22 @@ export async function api(path, options = {}) {
 
   let response
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    const apiBase = await getApiBase()
+    response = await fetch(`${apiBase}${path}`, {
       ...options,
       headers,
       body: options.body && !(options.body instanceof FormData)
         ? JSON.stringify(options.body)
         : options.body,
     })
-  } catch {
-    throw new Error('Le backend est inaccessible. Vérifiez qu’il tourne sur le port 4000.')
+  } catch (error) {
+    const local = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    const productionMessage = error instanceof TypeError
+      ? 'Le backend en ligne est inaccessible. Vérifiez son URL HTTPS et sa configuration CORS.'
+      : error.message
+    throw new Error(local
+      ? 'Le backend local est inaccessible. Vérifiez qu’il tourne sur le port 4000.'
+      : productionMessage)
   }
 
   const data = response.status === 204

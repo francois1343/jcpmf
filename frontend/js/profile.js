@@ -1,5 +1,6 @@
 import { api } from './api.js'
 import { escapeHtml, mountNavigation, requireUser, showMessage } from './common.js'
+import { mountReminderSettings } from './reminder-ui.js'
 
 const profile = document.querySelector('#profile')
 const message = document.querySelector('#message')
@@ -23,11 +24,14 @@ async function load() {
       <div class="profile-field"><span>Adresse e-mail</span><strong>${escapeHtml(user.email)}</strong></div>
       <div class="profile-field"><span>Type de compte</span><strong>Coureur</strong></div>
     </section>
+    <section id="reminder-settings" class="card settings-card" aria-label="Réglages des rappels"></section>
     <section class="card danger-zone">
       <h2>Réinitialiser ma progression</h2>
       <p class="muted">Toutes les séances et tous les bilans seront effacés. Votre compte et le programme sont conservés.</p>
       <button id="reset-all" class="button button-danger" type="button">Tout réinitialiser</button>
     </section>`
+
+  mountReminderSettings(document.querySelector('#reminder-settings'))
 
   document.querySelector('#reset-all').addEventListener('click', async (event) => {
     if (!window.confirm('Réinitialiser toute votre progression ?')) return

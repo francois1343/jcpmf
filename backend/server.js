@@ -35,14 +35,16 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ message: 'Erreur interne du serveur.' })
 })
 
-const port = Number(process.env.PORT || 4000)
-app.listen(port, (error) => {
-  if (error) {
-    console.error(`Impossible de démarrer l’API : ${error.message}`)
-    process.exitCode = 1
-    return
-  }
-  console.log(`API JCPMF disponible sur le port ${port}`)
-})
+if (require.main === module) {
+  const port = Number(process.env.PORT || 4000)
+  app.listen(port, (error) => {
+    if (error) {
+      console.error(`Impossible de démarrer l’API : ${error.message}`)
+      process.exitCode = 1
+      return
+    }
+    console.log(`API JCPMF disponible sur le port ${port}`)
+  })
+}
 
 module.exports = app

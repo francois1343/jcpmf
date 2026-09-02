@@ -1,5 +1,8 @@
 import { clearSession, currentUser, getStoredUser, getToken } from './api.js'
 import { setupInstallButtons } from './pwa.js'
+import { startReminderChecks } from './reminders.js'
+
+startReminderChecks()
 
 export function escapeHtml(value = '') {
   return String(value).replace(/[&<>'"]/g, (character) => ({

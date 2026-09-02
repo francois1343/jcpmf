@@ -15,6 +15,8 @@ Application composée d’une API Express, d’un stockage JSON temporaire ou My
 - Réinitialisation de la progression par session, semaine, saison ou programme complet.
 - CMS administrateur : CRUD des saisons, semaines, sessions et exercices ; suivi de l’avancement des coureurs.
 - Installation sur l’écran d’accueil grâce au manifeste et au Service Worker écrits en JavaScript natif.
+- Tableau de bord d’engagement local : séances terminées, temps de course/marche cumulé, séries quotidiennes et hebdomadaires, et meilleure journée.
+- Rappels d’inactivité facultatifs via l’API Notification et le Service Worker.
 - Mode JSON de développement couvrant les mêmes endpoints que MySQL, afin de tester l’application sans base distante.
 
 Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
@@ -37,8 +39,10 @@ Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretchi
 │   └── server.js
 ├── frontend
 │   ├── css/styles.css
+│   ├── api/config.js
 │   ├── js/{api,common,config}.js
 │   ├── js/{login,register,dashboard,session,profile,admin}.js
+│   ├── js/{gamification,engagement,reminders,reminder-ui}.js
 │   ├── {index,login,register,session,profile,admin}.html
 │   ├── manifest.webmanifest
 │   ├── sw.js
@@ -99,6 +103,19 @@ La localisation et les capteurs de mouvement nécessitent l’autorisation de l�
 
 L’application est installable après son déploiement en HTTPS. Sur Android, le bouton `Installer` ouvre la demande du navigateur. Sur iPhone, utiliser Safari puis `Partager` → `Sur l’écran d’accueil`. Le Service Worker conserve les fichiers de l’interface, mais les données personnalisées et leur synchronisation nécessitent toujours l’accès au backend.
 
+## Engagement, statistiques et rappels locaux
+
+Le module de gamification est entièrement exécuté dans le navigateur et ne demande aucun serveur multijoueur :
+
+- `frontend/js/gamification.js` conserve au maximum 1 000 séances dans la clé `localStorage` `jcpmf_gamification_v1`, calcule les statistiques et émet un événement à chaque changement ;
+- `frontend/js/engagement.js` met à jour les cartes de statistiques sans recharger la page ;
+- `frontend/js/reminders.js` conserve les préférences dans `jcpmf_reminders_v1` et demande l’autorisation avant toute notification ; la fenêtre de proposition n’apparaît qu’une fois et le réglage reste modifiable depuis « Mon profil » ;
+- `frontend/sw.js` affiche la notification et ramène l’utilisateur au tableau de bord lorsqu’il la touche.
+
+Une séance validée met immédiatement le stockage à jour ; les statistiques se recalculent dès leur affichage et aussi dans tout autre onglet ouvert.
+
+Les statistiques sont liées au navigateur et à l’appareil : supprimer les données du site efface cet historique. Sans serveur Push, une PWA web ne peut pas garantir l’exécution d’un minuteur arbitraire lorsqu’elle est totalement fermée. Le rappel est donc vérifié au lancement, au retour dans l’application et toutes les heures tant qu’elle reste active, puis affiché par le Service Worker.
+
 ## Installation locale avec MySQL
 
 Prérequis : Node.js 20+, npm et MySQL 8+.
@@ -136,7 +153,7 @@ Backend :
 - `JWT_EXPIRES_IN` : durée du token, `8h` par défaut
 - `FRONTEND_URL` : une ou plusieurs origines séparées par des virgules
 
-Frontend : l’adresse de l’API est définie de façon explicite dans `frontend/js/config.js`.
+Frontend Vercel : `BACKEND_API_URL` doit contenir l’adresse HTTPS du projet backend, sans port (par exemple `https://mon-backend.vercel.app`). La fonction `frontend/api/config.js` transmet cette valeur publique au frontend Vanilla. En local, l’adresse reste automatiquement `http://127.0.0.1:4000/api`.
 
 ## Endpoints REST du MVP
 
@@ -179,7 +196,7 @@ Les valeurs de `:resource` autorisées sont `seasons`, `weeks`, `sessions` et `e
 
 ## Déploiement
 
-- Frontend Vercel/Netlify : déployer le dossier statique `frontend`, sans commande de build. Pour la production, définir l’adresse publique du backend dans `frontend/js/config.js`. Le site doit être servi en HTTPS pour l’installation mobile.
-- Backend Vercel de test : déployer `backend` avec `DATA_STORE=json`, `JWT_SECRET` et `FRONTEND_URL`. Le fichier est copié dans l’espace temporaire de la fonction ; inscriptions, CRUD et progressions peuvent être perdus lors d’un redémarrage à froid ou d’un redéploiement.
+- Frontend Vercel : créer un projet dont le dossier racine est `frontend`, sans commande de build, puis définir `BACKEND_API_URL` avec l’adresse HTTPS du backend.
+- Backend Vercel de test : créer un second projet dont le dossier racine est `backend`, puis définir `DATA_STORE=json`, `JWT_SECRET` et `FRONTEND_URL=https://jcpmf.vercel.app`. Le fichier est copié dans l’espace temporaire de la fonction ; inscriptions, CRUD et progressions peuvent être perdus lors d’un redémarrage à froid ou d’un redéploiement.
 - Backend Hostinger final : déployer `backend`, définir `DATA_STORE=mysql`, importer les deux fichiers SQL dans la base fournie, définir les variables d’environnement, puis exécuter `npm start`.
 - Les URLs de production doivent être en HTTPS pour la localisation et les capteurs du téléphone.

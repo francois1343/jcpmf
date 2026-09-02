@@ -3221,5 +3221,19 @@
       "position": 3
     }
   ],
-  "progress": []
+  "progress": [
+    {
+      "id": 1,
+      "userId": 2,
+      "trainingSessionId": 1,
+      "createdAt": "2026-09-02T09:26:20.480Z",
+      "updatedAt": "2026-09-02T09:26:20.480Z",
+      "status": "in_progress",
+      "currentExerciseIndex": 0,
+      "distanceKm": null,
+      "stepsCount": null,
+      "startedAt": "2026-09-02T09:26:20.480Z",
+      "completedAt": null
+    }
+  ]
 }

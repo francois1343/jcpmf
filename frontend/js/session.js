@@ -1,5 +1,6 @@
 import { api } from './api.js'
 import { escapeHtml, formatMinutes, formatTime, mountNavigation, requireUser, showMessage } from './common.js'
+import { effortDurationOf, recordSessionCompletion } from './gamification.js'
 
 const container = document.querySelector('#session')
 const message = document.querySelector('#message')
@@ -246,6 +247,14 @@ async function completeSession() {
     await api(`/runner/sessions/${sessionId}/complete`, {
       method: 'PUT',
       body: { distanceKm: Number(state.distanceKm.toFixed(2)), stepsCount: state.stepsCount },
+    })
+    recordSessionCompletion({
+      sessionId,
+      title: session.title,
+      completedAt: new Date().toISOString(),
+      durationSeconds: effortDurationOf(session.exercises),
+      distanceKm: Number(state.distanceKm.toFixed(2)),
+      stepsCount: state.stepsCount,
     })
     localStorage.removeItem(storageKey())
     container.innerHTML = `<section class="card stack"><p class="eyebrow">Séance enregistrée</p><h1>Votre progression est à jour.</h1><a class="button button-large" href="/index.html">Retour au programme</a></section>`

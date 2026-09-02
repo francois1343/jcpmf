@@ -1,5 +1,8 @@
 import { api } from './api.js'
 import { escapeHtml, formatMinutes, mountNavigation, requireUser, showMessage } from './common.js'
+import { mountEngagementDashboard } from './engagement.js'
+import { syncCompletedSessions } from './gamification.js'
+import { showReminderOnboardingOnce } from './reminder-ui.js'
 
 const dashboard = document.querySelector('#dashboard')
 const message = document.querySelector('#message')
@@ -39,17 +42,21 @@ function sessionRow(session, index) {
 }
 
 function renderPlan() {
-  return (plan.seasons || []).map((season, seasonIndex) => `
-    <details class="season" ${seasonIndex === 0 ? 'open' : ''}>
+  return (plan.seasons || []).map((season) => `
+    <details class="season">
       <summary class="season-summary">
-        <span>${escapeHtml(season.title)}<small>${escapeHtml(season.description || '')}</small></span>
-        <span>${season.completedCount}/${season.sessionCount}</span>
+        <span class="summary-title">${escapeHtml(season.title)}</span>
+        <span class="summary-progress">${season.completedCount}/${season.sessionCount}</span>
       </summary>
-      <div class="reset-row"><button class="text-button" type="button" data-reset="season" data-id="${season.id}" data-label="${escapeHtml(season.title)}">Réinitialiser la saison</button></div>
-      ${(season.weeks || []).map((week, weekIndex) => `
-        <details class="week" ${seasonIndex === 0 && weekIndex === 0 ? 'open' : ''}>
+      <div class="season-intro">
+        <p>${escapeHtml(season.description || '')}</p>
+        <button class="text-button" type="button" data-reset="season" data-id="${season.id}" data-label="${escapeHtml(season.title)}">Réinitialiser la saison</button>
+      </div>
+      ${(season.weeks || []).map((week) => `
+        <details class="week">
           <summary class="week-summary">
-            <span>${escapeHtml(week.title)}<small>${week.completedCount}/${week.sessions.length} séances terminées</small></span>
+            <span class="summary-title">${escapeHtml(week.title)}</span>
+            <span class="summary-progress">${week.completedCount}/${week.sessions.length} terminées</span>
           </summary>
           <div class="reset-row"><button class="text-button" type="button" data-reset="week" data-id="${week.id}" data-label="${escapeHtml(week.title)}">Réinitialiser la semaine</button></div>
           <div class="sessions">${week.sessions.map(sessionRow).join('') || '<p class="loading">Aucune séance pour ce filtre.</p>'}</div>
@@ -94,7 +101,10 @@ function render(user) {
         </div>
       </header>
       <div class="plan">${renderPlan()}</div>
-    </section>`
+    </section>
+    <section id="engagement-dashboard" class="engagement-section" aria-label="Statistiques et gamification"></section>`
+  mountEngagementDashboard(document.querySelector('#engagement-dashboard'))
+  showReminderOnboardingOnce()
 }
 
 async function load() {
@@ -107,6 +117,7 @@ async function load() {
   mountNavigation(user)
   try {
     plan = await api('/runner/plan')
+    syncCompletedSessions(plan)
     render(user)
   } catch (error) {
     dashboard.hidden = true
