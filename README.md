@@ -17,6 +17,8 @@ Application composée d’une API Express, d’un stockage JSON temporaire ou My
 - Installation sur l’écran d’accueil grâce au manifeste et au Service Worker écrits en JavaScript natif.
 - Tableau de bord d’engagement local : séances terminées, temps de course/marche cumulé, séries quotidiennes et hebdomadaires, et meilleure journée.
 - Rappels d’inactivité facultatifs via l’API Notification et le Service Worker.
+- Photo de profil locale avec prévisualisation, compression Canvas, galerie d’avatars SVG et affichage dans la navigation.
+- Export local de l’historique des séances en CSV compatible Excel et sauvegarde complète du `localStorage` en JSON.
 - Mode JSON de développement couvrant les mêmes endpoints que MySQL, afin de tester l’application sans base distante.
 
 Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretching`. Si la base a été créée avant l’ajout de `stretching`, importer `backend/database/migrations/002_add_stretching_type.sql` une seule fois.
@@ -38,9 +40,10 @@ Les exercices utilisent les types `warmup`, `run`, `walk`, `sprint` et `stretchi
 │   ├── utils/validation.js
 │   └── server.js
 ├── frontend
+│   ├── assets/avatars/*.svg
 │   ├── css/styles.css
 │   ├── api/config.js
-│   ├── js/{api,common,config}.js
+│   ├── js/{api,avatar,common,config,data-export}.js
 │   ├── js/{login,register,dashboard,session,profile,admin}.js
 │   ├── js/{gamification,engagement,reminders,reminder-ui}.js
 │   ├── {index,login,register,session,profile,admin}.html
@@ -115,6 +118,12 @@ Le module de gamification est entièrement exécuté dans le navigateur et ne de
 Une séance validée met immédiatement le stockage à jour ; les statistiques se recalculent dès leur affichage et aussi dans tout autre onglet ouvert.
 
 Les statistiques sont liées au navigateur et à l’appareil : supprimer les données du site efface cet historique. Sans serveur Push, une PWA web ne peut pas garantir l’exécution d’un minuteur arbitraire lorsqu’elle est totalement fermée. Le rappel est donc vérifié au lancement, au retour dans l’application et toutes les heures tant qu’elle reste active, puis affiché par le Service Worker.
+
+## Exporter les données locales
+
+Depuis « Mon profil », le coureur peut télécharger ses séances terminées dans `mes_courses_YYYY-MM-DD.csv`. Le fichier utilise le séparateur point-virgule et un BOM UTF-8 pour conserver correctement les accents dans Excel.
+
+Depuis l’administration, « Sauvegarder la base JSON » génère `jcpmf_backup_YYYY-MM-DD.json` avec une copie fidèle de toutes les clés et valeurs du `localStorage` du navigateur courant. Ce fichier peut contenir le jeton de connexion et la photo de profil : il doit rester privé. Cette sauvegarde locale ne remplace pas une sauvegarde du fichier `backend/database/data.json` ou d’une base MySQL distante.
 
 ## Installation locale avec MySQL
 

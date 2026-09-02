@@ -1,4 +1,5 @@
 import { clearSession, currentUser, getStoredUser, getToken } from './api.js'
+import { renderProfileAvatar } from './avatar.js'
 import { setupInstallButtons } from './pwa.js'
 import { startReminderChecks } from './reminders.js'
 
@@ -67,7 +68,7 @@ export function mountNavigation(user) {
         <img src="/images/image.png" alt="Je cours pour ma forme">
       </a>
       <div class="nav-actions">
-        <span class="nav-user">${escapeHtml(user.username)}</span>
+        <span class="nav-identity"><span class="nav-avatar" data-user-avatar aria-hidden="true"></span><span class="nav-user">${escapeHtml(user.username)}</span></span>
         ${user.role === 'admin'
           ? '<a href="/admin.html">Administration</a>'
           : '<a href="/profile.html">Mon profil</a>'}
@@ -75,6 +76,7 @@ export function mountNavigation(user) {
         <button class="button button-ghost" type="button" data-logout>Déconnexion</button>
       </div>
     </nav>`
+  renderProfileAvatar(target.querySelector('[data-user-avatar]'), user.username)
   setupInstallButtons()
   target.querySelector('[data-logout]').addEventListener('click', () => {
     clearSession()

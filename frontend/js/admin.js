@@ -1,5 +1,6 @@
 import { api } from './api.js'
 import { escapeHtml, mountNavigation, requireUser, showMessage } from './common.js'
+import { exportLocalStorageJson } from './data-export.js'
 
 const content = document.querySelector('#admin-content')
 const message = document.querySelector('#message')
@@ -116,6 +117,17 @@ document.querySelectorAll('[data-section]').forEach((button) => button.addEventL
 }))
 
 document.querySelector('#refresh').addEventListener('click', loadData)
+document.querySelector('#export-json').addEventListener('click', (event) => {
+  event.currentTarget.disabled = true
+  try {
+    const result = exportLocalStorageJson()
+    showMessage(message, `Sauvegarde créée : ${result.filename} (${result.count} élément${result.count > 1 ? 's' : ''}). Gardez ce fichier privé.`, 'success')
+  } catch (error) {
+    showMessage(message, error.message)
+  } finally {
+    event.currentTarget.disabled = false
+  }
+})
 
 content.addEventListener('click', async (event) => {
   const resourceButton = event.target.closest('[data-resource]')
